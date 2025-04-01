@@ -1,4 +1,5 @@
 from math import pi, sin, cos, tan, acos
+from typing import cast
 import cadquery as cq
 
 
@@ -16,9 +17,15 @@ def involute(
 
 
 def involuteProfile(
-    module: float, teeth: int, pressureAngle: float = 20.0
-) -> cq.Workplane:
+    module: float,
+    teeth: int,
+    pressureAngle: float = 20.0,
+    rootFillet: float | None = None,
+) -> cq.Wire:
     """Create an involute gear profile at the center of the XY plane"""
+
+    if rootFillet is None:
+        rootFillet = 0.38 * module 
 
     pressureAngleRad = pressureAngle * pi / 180
     pitchRadius = module * teeth / 2
@@ -71,11 +78,19 @@ def involuteProfile(
             rootRadius * cos(startAngle + 2 * involuteAngle + tipAngle),
             rootRadius * sin(startAngle + 2 * involuteAngle + tipAngle),
         )
-        # # Draw the root between teeth
+        # Draw the root between teeth
         wp = wp.radiusArc(
             (rootRadius * cos(endAngle), rootRadius * sin(endAngle)), -rootRadius
         )
 
     wp = wp.close()
+    wire = cast(cq.Wire, wp.val())
 
-    return wp
+    # Fillet only root verticess
+    rootVertices = [
+        v for v in wire.Vertices() if v.X * v.X + v.Y * v.Y < baseRadius * baseRadius
+    ]
+    assert len(rootVertices) == 2 * teeth
+    wire = wire.fillet2D(radius=rootFillet, vertices=rootVertices)  # This has to be fillet2D, not fillet
+
+    return wire

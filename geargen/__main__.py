@@ -10,12 +10,17 @@ if __name__ == "__main__":
     argParser.add_argument("-m", "--module", type=float, required=True)
     argParser.add_argument("-n", "--teeth", type=int, required=True)
     argParser.add_argument("-w", "--width", type=float, required=True)
+    argParser.add_argument("--root-fillet", type=float)
     argParser.add_argument("--pressure-angle", type=float, default=20)
 
     args = argParser.parse_args()
 
-    result = involuteProfile(
-        args.module, args.teeth, pressureAngle=args.pressure_angle
-    ).extrude(args.width)
+    profile = involuteProfile(
+        args.module,
+        args.teeth,
+        pressureAngle=args.pressure_angle,
+        rootFillet=args.root_fillet,
+    )
+    result = cq.Workplane(obj=profile).toPending().extrude(args.width)
 
     cq.exporters.export(result, args.output)
