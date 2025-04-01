@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geargen"
+version = "0.0.1"
+authors = [
+    { name = "Satoshi Tanaka", email = "overthere555@gmail.com" },
+]
+description = "A command-line gear generator"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Environment :: Console",
+    "Topic :: Scientific/Engineering",
+]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = [
+    "cadquery>=2.5.2"
+]
+
+[project.urls]
+Homepage = "https://github.com/tana/geargen"
+Issues = "https://github.com/tana/geargen/issues"
+
+[project.scripts]
+geargen = "geargen.cli:main"
