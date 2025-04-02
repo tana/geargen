@@ -1,8 +1,8 @@
 import argparse
-
+import sys
 import cadquery as cq
+from .parallel import makeParallelShaftGear
 
-from geargen.profile import involuteProfile
 
 def main():
     argParser = argparse.ArgumentParser(prog="geargen")
@@ -12,16 +12,26 @@ def main():
     argParser.add_argument("-w", "--width", type=float, required=True)
     argParser.add_argument("--root-fillet", type=float)
     argParser.add_argument("--pressure-angle", type=float, default=20)
+    argParser.add_argument("-ha", "--helix_angle", type=float, default=20)
+    argParser.add_argument("-t", "--type", default="spur")
+    argParser.add_argument("--normal", action="store_true")
 
     args = argParser.parse_args()
 
-    profile = involuteProfile(
-        args.module,
-        args.teeth,
-        pressureAngle=args.pressure_angle,
-        rootFillet=args.root_fillet,
-    )
-    result = cq.Workplane(obj=profile).toPending().extrude(args.width)
+    if args.type == "spur" or args.type == "helical" or args.type == "herringbone":
+        result = makeParallelShaftGear(
+            args.module,
+            args.teeth,
+            args.width,
+            pressureAngle=args.pressure_angle,
+            rootFillet=args.root_fillet,
+            type=args.type,
+            helixAngle=args.helix_angle,
+            normal=args.normal,
+        )
+    else:
+        print("Unsupported gear type", file=sys.stderr)
+        return -1
 
     cq.exporters.export(result, args.output)
 
