@@ -15,10 +15,28 @@ def main():
     argParser.add_argument("-ha", "--helix_angle", type=float, default=20)
     argParser.add_argument("-t", "--type", default="spur")
     argParser.add_argument("--normal", action="store_true")
+    argParser.add_argument("-od", "--outer_diameter", type=float)
 
     args = argParser.parse_args()
 
-    if args.type == "spur" or args.type == "helical" or args.type == "herringbone":
+    if (
+        args.type == "spur"
+        or args.type == "helical"
+        or args.type == "herringbone"
+        or args.type == "internal"
+        or args.type == "internal_helical"
+        or args.type == "internal_herringbone"
+    ):
+        if (
+            args.type == "internal"
+            or args.type == "internal_helical"
+            or args.type == "internal_herringbone"
+        ) and args.outer_diameter is None:
+            print(
+                "Outer diameter (-od) is necessary for internal gears", file=sys.stderr
+            )
+            return -1
+
         result = makeParallelShaftGear(
             args.module,
             args.teeth,
@@ -28,6 +46,7 @@ def main():
             type=args.type,
             helixAngle=args.helix_angle,
             normal=args.normal,
+            outerDiameter=args.outer_diameter,
         )
     else:
         print("Unsupported gear type", file=sys.stderr)

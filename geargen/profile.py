@@ -21,6 +21,7 @@ def involuteProfile(
     teeth: int,
     pressureAngle: float = 20.0,
     rootFillet: float | None = None,
+    internal: bool = False
 ) -> cq.Wire:
     """Create an involute gear profile at the center of the XY plane"""
 
@@ -30,8 +31,8 @@ def involuteProfile(
     pressureAngleRad = pressureAngle * pi / 180
     pitchRadius = module * teeth / 2
     baseRadius = pitchRadius * cos(pressureAngleRad)
-    tipRadius = pitchRadius + module
-    rootRadius = pitchRadius - 1.25 * module
+    tipRadius = pitchRadius + 1.25 * module if internal else pitchRadius + module
+    rootRadius = pitchRadius - module if internal else pitchRadius - 1.25 * module
     # Angular thickness of an involute part of the tooth
     involuteAngle = tan(acos(baseRadius / tipRadius)) - acos(baseRadius / tipRadius)
     pitchInvoluteAngle = tan(pressureAngleRad) - pressureAngleRad
@@ -86,11 +87,13 @@ def involuteProfile(
     wp = wp.close()
     wire = cast(cq.Wire, wp.val())
 
-    # Fillet only root verticess
-    rootVertices = [
-        v for v in wire.Vertices() if v.X * v.X + v.Y * v.Y < baseRadius * baseRadius
-    ]
-    assert len(rootVertices) == 2 * teeth
-    wire = wire.fillet2D(radius=rootFillet, vertices=rootVertices)  # This has to be fillet2D, not fillet
+    # TODO: Tip fillet when internal gears (currently fillet2D raises error)
+    if not internal:
+        # Fillet only root vertices
+        rootVertices = [
+            v for v in wire.Vertices() if v.X * v.X + v.Y * v.Y < baseRadius * baseRadius
+        ]
+        assert len(rootVertices) == 2 * teeth
+        wire = wire.fillet2D(radius=rootFillet, vertices=rootVertices)  # This has to be fillet2D, not fillet
 
     return wire
