@@ -2,6 +2,7 @@ import argparse
 import sys
 import cadquery as cq
 from .parallel import makeParallelShaftGear
+from .bevel import makeBevelGear
 
 
 def main():
@@ -16,6 +17,8 @@ def main():
     argParser.add_argument("-t", "--type", default="spur")
     argParser.add_argument("--normal", action="store_true")
     argParser.add_argument("-od", "--outer_diameter", type=float)
+    argParser.add_argument("-nc", "--counterpart_teeth", type=int)
+    argParser.add_argument("-sa", "--shaft_angle", type=float, default=90)
 
     args = argParser.parse_args()
 
@@ -47,6 +50,17 @@ def main():
             helixAngle=args.helix_angle,
             normal=args.normal,
             outerDiameter=args.outer_diameter,
+        )
+    elif args.type == "bevel":
+        result = makeBevelGear(
+            args.module,
+            args.teeth,
+            args.counterpart_teeth,
+            args.width,
+            shaftAngle=args.shaft_angle,
+            pressureAngle=args.pressure_angle,
+            rootFillet=args.root_fillet,
+            type=args.type,
         )
     else:
         print("Unsupported gear type", file=sys.stderr)
