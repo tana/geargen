@@ -7,6 +7,14 @@
 - Internal gears
 - Bevel gears with arbitrary shaft angle
 
+## Install
+**geargen** can be installed from [PyPI](https://pypi.org/project/geargen/).
+The following command installs **geargen** with all dependencies.
+
+```
+pip install geargen
+```
+
 ## Usage
 All parameters are specified by command line options.
 Distances are specified in millimeters and angles are specified in degrees.
