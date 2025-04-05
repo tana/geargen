@@ -15,7 +15,7 @@ def makeBevelGear(
     pressureAngle: float = 20.0,
     rootFillet: float | None = None,
     type: Literal["bevel"] = "bevel",
-    flatPartCoeff: float = 0.9,
+    flatPartCoeff: float = 0.8,
 ) -> cq.Solid:
     pitchRadius = module * teeth / 2
     shaftAngleRad = shaftAngle * pi / 180
@@ -49,7 +49,7 @@ def makeBevelGear(
     outerFace = cq.Face(mf.Face()).fix()
 
     # Extrude it to make a bevel gear with specified facewidth
-    solid = outerFace.thicken(width)
+    solid = outerFace.thicken(-width)
 
     innerConeDistance = coneDistance - width
     innerConeHeight = coneHeight * (innerConeDistance / coneDistance)
@@ -58,24 +58,22 @@ def makeBevelGear(
     solid = cast(
         cq.Solid,
         solid
-        # Add top spherical part
-        + cq.Solid.makeCylinder(
-            innerConeDistance,
+        + cq.Solid.makeCylinder(    # Add top spherical part
+            topFlatRadius,
             coneHeight - innerConeHeight,
             pnt=(
                 0,
                 0,
-                sqrt(innerConeDistance**2 - topFlatRadius) + (coneHeight - innerConeHeight),
+                sqrt(innerConeDistance**2 - topFlatRadius**2),
             )
         )
-        # Remove bottom spherical part
-        - cq.Solid.makeCylinder(
-            coneDistance,
+        - cq.Solid.makeCylinder(    # Remove bottom spherical part
+            bottomFlatRadius,
             coneDistance,
             pnt=(
                 0,
                 0,
-                sqrt(coneDistance**2 - bottomFlatRadius**2) + coneDistance / 2,
+                sqrt(coneDistance**2 - bottomFlatRadius**2),
             ),
         ),
     )
